@@ -10,10 +10,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
+)
+
 var rootCmd = &cobra.Command{
-	Use:   "seda",
-	Short: "SedationH's CLI toolkit",
-	Long:  `A CLI tool for managing Git repositories and development workflows.`,
+	Use:  "seda",
+	Long: `A CLI tool for managing Git repositories and development workflows.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// If no subcommand is provided, show help
+		cmd.Help()
+	},
 }
 
 var codeCmd = &cobra.Command{
@@ -66,6 +75,10 @@ var codeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(codeCmd)
+
+	// Add version flag
+	rootCmd.Version = fmt.Sprintf("%s (commit: %s, date: %s)", version, commit, date)
+	rootCmd.Flags().BoolP("version", "v", false, "Print the version information")
 }
 
 func main() {

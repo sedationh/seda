@@ -1,4 +1,4 @@
-module github.com/sedationh/seda-cli
+module github.com/sedationh/seda
 
 go 1.24.2
 

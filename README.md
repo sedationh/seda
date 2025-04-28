@@ -9,7 +9,7 @@ A Go-based CLI toolkit for managing Git repositories and development workflows.
 - Support for custom repository names
 - Use a custom editor instead of VSCode (via environment variable)
 
-## Prerequisites
+## Development Prerequisites
 
 - Go 1.16 or later
 - Git
