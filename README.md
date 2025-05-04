@@ -19,8 +19,8 @@ A Go-based CLI toolkit for managing Git repositories and development workflows.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/sedationh/seda-cli.git
-cd seda-cli
+git clone https://github.com/sedationh/seda.git
+cd seda
 ```
 
 2. Build and install:
