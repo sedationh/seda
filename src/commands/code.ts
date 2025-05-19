@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import path from 'node:path';
 import fs from 'node:fs';
 import chalk from 'chalk';
-import { CloneOptions } from '../types';
 import { cloneRepository, getAlternativeUrl, extractRepoName } from '../utils/git';
 import { openInEditor } from '../utils/editor';
 

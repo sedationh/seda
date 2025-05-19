@@ -14,7 +14,7 @@
 ## Prerequisites
 
 - Node.js (v14 or higher)
-- npm or yarn
+- pnpm
 - Git
 - Visual Studio Code (or your preferred editor)
 
@@ -28,17 +28,17 @@
 
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. Build the project:
    ```bash
-   npm run build
+   pnpm build
    ```
 
 4. Install globally:
    ```bash
-   npm install -g .
+   pnpm install -g .
    ```
 
 ## Usage
@@ -70,22 +70,22 @@ seda code https://github.com/example/repo.git my-project
 
 - Run in development mode:
   ```bash
-  npm run dev
+  pnpm dev
   ```
 
 - Run tests:
   ```bash
-  npm test
+  pnpm test
   ```
 
 - Lint code:
   ```bash
-  npm run lint
+  pnpm lint
   ```
 
 - Format code:
   ```bash
-  npm run format
+  pnpm format
   ```
 
 ## Project Structure
