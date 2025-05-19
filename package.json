@@ -1,0 +1,35 @@
+{
+  "name": "seda",
+  "version": "0.1.0",
+  "description": "SedationH's CLI toolkit",
+  "main": "dist/index.js",
+  "bin": {
+    "seda": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": ["cli", "toolkit", "automation"],
+  "author": "SedationH <sedationh@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "inquirer": "^9.2.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/inquirer": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+} 
