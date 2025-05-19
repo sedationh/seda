@@ -1,0 +1,13 @@
+[package]
+name = "seda"
+version = "0.1.0"
+edition = "2021"
+
+authors = ["SedationH <sedationh@gmail.com>"]
+description = "SedationH's CLI toolkit"
+license = "MIT"
+repository = "https://github.com/sedationh/seda_cli"
+
+[dependencies]
+clap = { version = "3.2", features = ["derive"] }
+url = "2.4.0"
