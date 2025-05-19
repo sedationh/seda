@@ -1,23 +1,24 @@
 # seda CLI
 
-`seda` is SedationH's CLI toolkit
+`seda` is SedationH's CLI toolkit for automating daily tasks.
 
 ## Features
 
 - Clone a Git repository from a given URL
 - Automatically open the cloned repository in Visual Studio Code
 - Support for custom repository names
-- Fallback to alternative URL format if initial clone fails
+- Fallback to alternative URL format if initial clone fails (SSH ↔ HTTPS)
 - Use a custom editor instead of VSCode (via environment variable)
+- TypeScript implementation with full type safety
 
-#### Prerequisites
+## Prerequisites
 
 - Node.js (v14 or higher)
 - npm or yarn
 - Git
 - Visual Studio Code (or your preferred editor)
 
-#### Installation
+## Installation
 
 1. Clone the repository:
    ```bash
@@ -47,15 +48,22 @@
 Clone a GitHub repository and open it in VSCode:
 
 ```bash
-seda code <repository_url> [--new-name <name>]
+seda code <repository_url> [new_name]
 ```
 
-- `<repository_url>`: The URL of the GitHub repository you want to clone.
-- `--new-name <name>`: (Optional) A new name for the cloned directory.
+- `<repository_url>`: The URL of the GitHub repository you want to clone (supports both HTTPS and SSH formats)
+- `[new_name]`: (Optional) A new name for the cloned directory
 
-Example:
+Examples:
 ```bash
-seda code https://github.com/example/repo.git --new-name my-project
+# Clone using HTTPS URL
+seda code https://github.com/example/repo.git
+
+# Clone using SSH URL
+seda code git@github.com:example/repo.git
+
+# Clone with custom directory name
+seda code https://github.com/example/repo.git my-project
 ```
 
 ## Development
@@ -80,6 +88,26 @@ seda code https://github.com/example/repo.git --new-name my-project
   npm run format
   ```
 
+## Project Structure
+
+```
+src/
+├── commands/        # CLI commands
+│   └── code.ts     # Code command implementation
+├── utils/          # Utility functions
+│   ├── editor.ts   # Editor-related utilities
+│   └── git.ts      # Git-related utilities
+├── types.ts        # TypeScript type definitions
+└── index.ts        # Main entry point
+```
+
+## Environment Variables
+
+- `VSCODE_ALTERNATIVE`: Set a custom editor to replace VSCode. For example:
+  ```sh
+  export VSCODE_ALTERNATIVE=cursor
+  ```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -91,10 +119,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Author
 
 SedationH
-
-## Environment Variables
-
-- `VSCODE_ALTERNATIVE`: Set a custom editor to replace VSCode. For example:
-  ```sh
-  export VSCODE_ALTERNATIVE=cursor
-  ```

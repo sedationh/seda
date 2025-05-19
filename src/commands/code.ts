@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import chalk from 'chalk';
 import { CloneOptions } from '../types';
 import { cloneRepository, getAlternativeUrl, extractRepoName } from '../utils/git';
@@ -11,12 +11,12 @@ export function registerCodeCommand(program: Command): void {
     .command('code')
     .description('Clone a repository and open it in your editor')
     .argument('<repo-url>', 'URL of the repository to clone')
-    .option('-n, --new-name <name>', 'Custom name for the cloned directory')
-    .action(async (repoUrl: string, options: CloneOptions) => {
+    .argument('[new-name]', 'Custom name for the cloned directory')
+    .action(async (repoUrl: string, newName?: string) => {
       try {
         const repoName = extractRepoName(repoUrl);
-        const newName = options.newName || repoName;
-        const targetDir = path.join(process.cwd(), newName);
+        const targetName = newName || repoName;
+        const targetDir = path.join(process.cwd(), targetName);
 
         if (fs.existsSync(targetDir)) {
           console.log(chalk.blue(`Opening existing directory: ${targetDir}`));
