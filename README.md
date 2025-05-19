@@ -22,8 +22,8 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/sedationh/seda_cli.git
-   cd seda_cli
+   git clone https://github.com/sedationh/seda.git
+   cd seda
    ```
 
 2. Install dependencies:
