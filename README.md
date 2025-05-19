@@ -38,7 +38,7 @@
 
 4. Install globally:
    ```bash
-   pnpm install -g .
+   npm install -g .
    ```
 
 ## Usage
