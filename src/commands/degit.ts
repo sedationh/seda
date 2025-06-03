@@ -30,7 +30,7 @@ export function registerDegitCommand(program: Command): void {
       try {
         // Check if repository looks like a URL
         const isUrl = repository && (repository.includes('github.com') || repository.startsWith('http'));
-        
+
         if (!repository || !isUrl) {
           // Interactive mode - show cached repos
           // If repository doesn't look like URL, treat it as destination
@@ -49,7 +49,7 @@ export function registerDegitCommand(program: Command): void {
 
 async function interactiveMode(destination: string, options: any): Promise<void> {
   const cachedRepos = getCachedRepos();
-  
+
   if (cachedRepos.length === 0) {
     console.log(chalk.yellow('No cached repositories found.'));
     console.log(chalk.gray('Use: seda degit <repository-url> to clone a repository first.'));
@@ -82,7 +82,7 @@ async function cloneRepo(repository: string, destination: string, options: any):
   }
 
   const repo = parseRepoUrl(repository);
-  
+
   // Check if destination exists and is not empty
   if (fs.existsSync(destination)) {
     const files = fs.readdirSync(destination);
@@ -133,13 +133,13 @@ async function cloneRepo(repository: string, destination: string, options: any):
     if (verbose) {
       console.log(chalk.cyan(`> Downloading ${downloadUrl}`));
     }
-    
+
     try {
       await downloadFile(downloadUrl, tarFile);
     } catch (error) {
       throw new Error(`Failed to download repository: ${error}`);
     }
-  } else if (verbose) {
+  } else {
     console.log(chalk.cyan(`> Using cached file: ${tarFile}`));
   }
 
@@ -149,7 +149,7 @@ async function cloneRepo(repository: string, destination: string, options: any):
   }
 
   mkdirp(destination);
-  
+
   const subdir = repo.subdir ? `${repo.name}-${hash}${repo.subdir}` : undefined;
   await extractTar(tarFile, destination, subdir);
 
@@ -157,24 +157,24 @@ async function cloneRepo(repository: string, destination: string, options: any):
   if (git) {
     try {
       const destPath = path.resolve(destination);
-      
+
       // Check if already in a git repository
       const isInGitRepo = fs.existsSync(path.join(destPath, '.git'));
-      
+
       if (!isInGitRepo) {
         if (verbose) {
           console.log(chalk.cyan(`> Initializing git repository in ${destination}`));
         }
-        
+
         // Initialize git repository
         execSync('git init', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
-        
+
         // Add all files
         execSync('git add .', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
-        
+
         // Make initial commit
         execSync('git commit -m "Init"', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
-        
+
         if (verbose) {
           console.log(chalk.cyan(`> Created initial commit`));
         }
