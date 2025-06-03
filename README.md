@@ -46,12 +46,24 @@
 After building the project, you can install it globally to use the `seda` command anywhere:
 
 ### Method 1: npm link (Recommended for development)
+
+Make sure to build the project first:
+```bash
+pnpm build
+```
+
 ```bash
 npm link
 ```
 This creates a symlink to your local development version. Changes to the code will take effect after rebuilding.
 
 ### Method 2: Global installation
+
+Make sure to build the project first:
+```bash
+pnpm build
+```
+
 ```bash
 npm install -g .
 ```
