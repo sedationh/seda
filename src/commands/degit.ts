@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { execSync } from 'node:child_process';
 import {
   parseRepoUrl,
   fetchRefs,
@@ -24,6 +25,7 @@ export function registerDegitCommand(program: Command): void {
     .argument('[destination]', 'Destination directory', '.')
     .option('-f, --force', 'Overwrite existing files')
     .option('-v, --verbose', 'Verbose output')
+    .option('--no-git', 'Skip git init and initial commit')
     .action(async (repository?: string, destination?: string, options?: any) => {
       try {
         // Check if repository looks like a URL
@@ -73,7 +75,7 @@ async function interactiveMode(destination: string, options: any): Promise<void>
 }
 
 async function cloneRepo(repository: string, destination: string, options: any): Promise<void> {
-  const { force = false, verbose = false } = options || {};
+  const { force = false, verbose = false, git = true } = options || {};
 
   if (verbose) {
     console.log(chalk.cyan(`> Parsing repository: ${repository}`));
@@ -150,6 +152,42 @@ async function cloneRepo(repository: string, destination: string, options: any):
   
   const subdir = repo.subdir ? `${repo.name}-${hash}${repo.subdir}` : undefined;
   await extractTar(tarFile, destination, subdir);
+
+  // Initialize git repository and make initial commit if enabled
+  if (git) {
+    try {
+      const destPath = path.resolve(destination);
+      
+      // Check if already in a git repository
+      const isInGitRepo = fs.existsSync(path.join(destPath, '.git'));
+      
+      if (!isInGitRepo) {
+        if (verbose) {
+          console.log(chalk.cyan(`> Initializing git repository in ${destination}`));
+        }
+        
+        // Initialize git repository
+        execSync('git init', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
+        
+        // Add all files
+        execSync('git add .', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
+        
+        // Make initial commit
+        execSync('git commit -m "Init"', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
+        
+        if (verbose) {
+          console.log(chalk.cyan(`> Created initial commit`));
+        }
+      } else if (verbose) {
+        console.log(chalk.yellow(`> Skipping git init - already in a git repository`));
+      }
+    } catch (error) {
+      if (verbose) {
+        console.log(chalk.yellow(`> Warning: Failed to initialize git repository: ${error}`));
+      }
+      // Don't fail the entire operation if git init fails
+    }
+  }
 
   // Save to cache
   const cachedRepo: CachedRepo = {

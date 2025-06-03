@@ -132,6 +132,7 @@ seda degit [destination]
 #### Options
 - `-f, --force`: Overwrite existing files
 - `-v, --verbose`: Verbose output
+- `--no-git`: Skip automatic git initialization and initial commit
 
 #### Features
 - ✅ Fast cloning without git history
@@ -139,17 +140,30 @@ seda degit [destination]
 - ✅ Interactive mode with repository history
 - ✅ Support for GitHub repositories
 - ✅ Support for specific branches/tags/commits using `#ref` syntax
+- ✅ **Automatic Git initialization with initial commit**
+- ✅ Smart detection of existing git repositories
+
+#### Git Integration
+By default, `seda degit` will automatically:
+1. Initialize a new git repository (`git init`)
+2. Stage all files (`git add .`)
+3. Create an initial commit (`git commit -m "Init"`)
+
+This behavior can be disabled using the `--no-git` flag, and the command will skip git initialization if the destination is already inside a git repository.
 
 #### Examples
 ```bash
-# Clone to current directory
+# Clone to current directory (with automatic git init + commit)
 seda degit https://github.com/Rich-Harris/degit
 
-# Clone to specific directory
+# Clone to specific directory (with automatic git init + commit)
 seda degit https://github.com/Rich-Harris/degit my-project
 
-# Clone specific branch
+# Clone specific branch (with automatic git init + commit)
 seda degit https://github.com/Rich-Harris/degit#dev my-project
+
+# Clone without git initialization
+seda degit https://github.com/Rich-Harris/degit my-project --no-git
 
 # Interactive mode
 seda degit
@@ -157,8 +171,11 @@ seda degit
 # Interactive mode with destination
 seda degit my-project
 
-# Verbose output
+# Verbose output (shows git operations)
 seda degit https://github.com/Rich-Harris/degit my-project -v
+
+# Force overwrite existing files and skip git init
+seda degit https://github.com/Rich-Harris/degit existing-project --force --no-git
 ```
 
 ## Development
