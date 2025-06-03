@@ -133,6 +133,7 @@ seda degit [destination]
 - `-f, --force`: Overwrite existing files
 - `-v, --verbose`: Verbose output
 - `--no-git`: Skip automatic git initialization and initial commit
+- `--no-open`: Skip opening project in editor (by default, projects are automatically opened)
 
 #### Features
 - ✅ Fast cloning without git history
@@ -141,6 +142,7 @@ seda degit [destination]
 - ✅ Support for GitHub repositories
 - ✅ Support for specific branches/tags/commits using `#ref` syntax
 - ✅ **Automatic Git initialization with initial commit**
+- ✅ **Automatic opening in editor (VS Code, Cursor, or custom editor)**
 - ✅ Smart detection of existing git repositories
 
 #### Git Integration
@@ -151,31 +153,45 @@ By default, `seda degit` will automatically:
 
 This behavior can be disabled using the `--no-git` flag, and the command will skip git initialization if the destination is already inside a git repository.
 
+#### Editor Integration
+By default, `seda degit` will automatically open the cloned project in your preferred editor after successful cloning. The editor selection follows this priority:
+1. Custom editor set via `VSCODE_ALTERNATIVE` environment variable
+2. VS Code (`code` command)
+3. Cursor (`cursor` command)
+
+This behavior can be disabled using the `--no-open` flag.
+
 #### Examples
 ```bash
-# Clone to current directory (with automatic git init + commit)
+# Clone to current directory (with automatic git init + commit + editor opening)
 seda degit https://github.com/Rich-Harris/degit
 
-# Clone to specific directory (with automatic git init + commit)
+# Clone to specific directory (with automatic git init + commit + editor opening)
 seda degit https://github.com/Rich-Harris/degit my-project
 
-# Clone specific branch (with automatic git init + commit)
+# Clone specific branch (with automatic git init + commit + editor opening)
 seda degit https://github.com/Rich-Harris/degit#dev my-project
 
-# Clone without git initialization
+# Clone without git initialization but still open in editor
 seda degit https://github.com/Rich-Harris/degit my-project --no-git
 
-# Interactive mode
+# Clone without opening in editor
+seda degit https://github.com/Rich-Harris/degit my-project --no-open
+
+# Clone without git initialization and without opening in editor
+seda degit https://github.com/Rich-Harris/degit my-project --no-git --no-open
+
+# Interactive mode (will open selected repo in editor)
 seda degit
 
-# Interactive mode with destination
+# Interactive mode with destination (will open selected repo in editor)
 seda degit my-project
 
-# Verbose output (shows git operations)
+# Verbose output (shows git operations and editor opening)
 seda degit https://github.com/Rich-Harris/degit my-project -v
 
-# Force overwrite existing files and skip git init
-seda degit https://github.com/Rich-Harris/degit existing-project --force --no-git
+# Force overwrite existing files, skip git init, and skip editor opening
+seda degit https://github.com/Rich-Harris/degit existing-project --force --no-git --no-open
 ```
 
 ## Development
