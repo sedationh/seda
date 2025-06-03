@@ -41,7 +41,42 @@
    npm install -g .
    ```
 
-## Usage
+## Local Installation
+
+After building the project, you can install it globally to use the `seda` command anywhere:
+
+### Method 1: npm link (Recommended for development)
+```bash
+npm link
+```
+This creates a symlink to your local development version. Changes to the code will take effect after rebuilding.
+
+### Method 2: Global installation
+```bash
+npm install -g .
+```
+This installs a copy of the current version globally.
+
+### Method 3: Package installation
+```bash
+npm pack
+npm install -g seda-0.1.0.tgz
+```
+
+### Verify installation
+```bash
+seda --help
+seda degit --help
+```
+
+### Uninstall (if needed)
+```bash
+npm unlink -g seda
+# or
+npm uninstall -g seda
+```
+
+## Commands
 
 ### `seda code`
 
