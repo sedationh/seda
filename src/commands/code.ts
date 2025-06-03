@@ -42,6 +42,7 @@ export function registerCodeCommand(program: Command): void {
 
         console.log(chalk.blue(`Opening new directory: ${targetDir}`));
         await openInEditor(targetDir);
+        console.log(chalk.green('Project opened in editor.'));
       } catch (error) {
         console.error(chalk.red(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`));
         process.exit(1);

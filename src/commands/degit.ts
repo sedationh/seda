@@ -15,6 +15,7 @@ import {
   saveCachedRepo,
   getCacheDir
 } from '../utils/git';
+import { openInEditor } from '../utils/editor';
 import { CachedRepo } from '../types';
 
 export function registerDegitCommand(program: Command): void {
@@ -26,6 +27,7 @@ export function registerDegitCommand(program: Command): void {
     .option('-f, --force', 'Overwrite existing files')
     .option('-v, --verbose', 'Verbose output')
     .option('--no-git', 'Skip git init and initial commit')
+    .option('--no-open', 'Skip opening project in editor')
     .action(async (repository?: string, destination?: string, options?: any) => {
       try {
         // Check if repository looks like a URL
@@ -75,7 +77,7 @@ async function interactiveMode(destination: string, options: any): Promise<void>
 }
 
 async function cloneRepo(repository: string, destination: string, options: any): Promise<void> {
-  const { force = false, verbose = false, git = true } = options || {};
+  const { force = false, verbose = false, git = true, open = true } = options || {};
 
   if (verbose) {
     console.log(chalk.cyan(`> Parsing repository: ${repository}`));
@@ -198,4 +200,18 @@ async function cloneRepo(repository: string, destination: string, options: any):
   saveCachedRepo(cachedRepo);
 
   console.log(chalk.green(`✓ Cloned ${repo.user}/${repo.name}#${repo.ref} to ${destination}`));
+
+  // Open project in editor if enabled
+  if (open) {
+    if (verbose) {
+      console.log(chalk.cyan(`> Opening project in editor...`));
+    }
+    try {
+      await openInEditor(path.resolve(destination));
+      console.log(chalk.green(`✓ Opened project in editor`));
+    } catch (error) {
+      console.log(chalk.yellow(`⚠ Could not open project in editor: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      console.log(chalk.gray(`Navigate to: ${path.resolve(destination)}`));
+    }
+  }
 } 
