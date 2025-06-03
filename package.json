@@ -14,17 +14,23 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
-  "keywords": ["cli", "toolkit", "automation"],
+  "keywords": [
+    "cli",
+    "toolkit",
+    "automation"
+  ],
   "author": "SedationH <sedationh@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "commander": "^11.1.0",
     "chalk": "^4.1.2",
-    "inquirer": "^9.2.12"
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
     "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.11.24",
+    "@types/tar": "^6.1.13",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
@@ -32,4 +38,4 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
-} 
+}

@@ -66,6 +66,54 @@ seda code git@github.com:example/repo.git
 seda code https://github.com/example/repo.git my-project
 ```
 
+### `seda degit`
+Clone repositories without git history (inspired by [degit](https://github.com/Rich-Harris/degit)).
+
+#### Direct Mode
+Clone a specific repository:
+```bash
+seda degit https://github.com/user/repo [destination]
+seda degit https://github.com/user/repo my-project
+```
+
+#### Interactive Mode
+Choose from previously cloned repositories:
+```bash
+seda degit [destination]
+```
+
+#### Options
+- `-f, --force`: Overwrite existing files
+- `-v, --verbose`: Verbose output
+
+#### Features
+- ✅ Fast cloning without git history
+- ✅ Automatic caching of downloaded archives
+- ✅ Interactive mode with repository history
+- ✅ Support for GitHub repositories
+- ✅ Support for specific branches/tags/commits using `#ref` syntax
+
+#### Examples
+```bash
+# Clone to current directory
+seda degit https://github.com/Rich-Harris/degit
+
+# Clone to specific directory
+seda degit https://github.com/Rich-Harris/degit my-project
+
+# Clone specific branch
+seda degit https://github.com/Rich-Harris/degit#dev my-project
+
+# Interactive mode
+seda degit
+
+# Interactive mode with destination
+seda degit my-project
+
+# Verbose output
+seda degit https://github.com/Rich-Harris/degit my-project -v
+```
+
 ## Development
 
 - Run in development mode:
