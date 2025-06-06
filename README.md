@@ -1,249 +1,153 @@
-# seda CLI
+# Seda CLI
 
-`seda` is SedationH's CLI toolkit for automating daily tasks.
+A powerful command-line tool for cloning and managing git repositories with enhanced workflow features.
 
 ## Features
 
-- Clone a Git repository from a given URL
-- Automatically open the cloned repository in Visual Studio Code
-- Support for custom repository names
-- Fallback to alternative URL format if initial clone fails (SSH ↔ HTTPS)
-- Use a custom editor instead of VSCode (via environment variable)
-- TypeScript implementation with full type safety
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- pnpm
-- Git
-- Visual Studio Code (or your preferred editor)
+- 🚀 **Quick Repository Cloning** - Clone repositories with automatic editor integration
+- 📦 **Degit Support** - Clone repositories without git history for faster downloads
 
 ## Installation
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/sedationh/seda.git
-   cd seda
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Build the project:
-   ```bash
-   pnpm build
-   ```
-
-4. Install globally:
-   ```bash
-   npm install -g .
-   ```
-
-## Local Installation
-
-After building the project, you can install it globally to use the `seda` command anywhere:
-
-### Method 1: npm link (Recommended for development)
-
-Make sure to build the project first:
 ```bash
-pnpm build
-```
-
-```bash
-npm link
-```
-This creates a symlink to your local development version. Changes to the code will take effect after rebuilding.
-
-### Method 2: Global installation
-
-Make sure to build the project first:
-```bash
-pnpm build
-```
-
-```bash
-npm install -g .
-```
-This installs a copy of the current version globally.
-
-### Method 3: Package installation
-```bash
-npm pack
-npm install -g seda-0.1.0.tgz
-```
-
-### Verify installation
-```bash
-seda --help
-seda degit --help
-```
-
-### Uninstall (if needed)
-```bash
-npm unlink -g seda
-# or
-npm uninstall -g seda
+npm install -g @sedationh/cli
 ```
 
 ## Commands
 
 ### `seda code`
 
-Clone a GitHub repository and open it in VSCode:
+Clone a repository and open it in your editor.
 
 ```bash
-seda code <repository_url> [new_name]
+seda code <repo-url> [new-name]
 ```
 
-- `<repository_url>`: The URL of the GitHub repository you want to clone (supports both HTTPS and SSH formats)
-- `[new_name]`: (Optional) A new name for the cloned directory
+**Arguments:**
+- `<repo-url>` - URL of the repository to clone (required)
+- `[new-name]` - Custom name for the cloned directory (optional)
 
-Examples:
+**Examples:**
 ```bash
-# Clone using HTTPS URL
-seda code https://github.com/example/repo.git
+# Clone a repository
+seda code https://github.com/user/awesome-project
 
-# Clone using SSH URL
-seda code git@github.com:example/repo.git
+# Clone with a custom directory name
+seda code https://github.com/user/awesome-project my-project
 
-# Clone with custom directory name
-seda code https://github.com/example/repo.git my-project
+# If directory exists, just open it in editor
+seda code https://github.com/user/existing-project
 ```
+
+**Features:**
+- Automatically opens the project in your configured editor after cloning
+- If the target directory already exists, skips cloning and just opens the project
+- Fallback mechanism tries alternative URL formats if the initial clone fails
+- Smart error handling with detailed logging
 
 ### `seda degit`
-Clone repositories without git history (inspired by [degit](https://github.com/Rich-Harris/degit)).
 
-#### Direct Mode
-Clone a specific repository:
+Clone repositories without git history for faster downloads and cleaner project setup.
+
 ```bash
-seda degit https://github.com/user/repo [destination]
-seda degit https://github.com/user/repo my-project
+seda degit [repository] [destination]
 ```
 
-#### Interactive Mode
-Choose from previously cloned repositories:
+**Arguments:**
+- `[repository]` - Repository URL (optional for interactive mode)
+- `[destination]` - Destination directory (default: current directory)
+
+**Options:**
+- `-f, --force` - Overwrite existing files in the destination directory
+- `--no-git` - Skip git initialization and initial commit
+- `--no-open` - Skip opening the project in your editor
+
+**Examples:**
 ```bash
-seda degit [destination]
-```
-
-#### Options
-- `-f, --force`: Overwrite existing files
-- `-v, --verbose`: Verbose output
-- `--no-git`: Skip automatic git initialization and initial commit
-- `--no-open`: Skip opening project in editor (by default, projects are automatically opened)
-
-#### Features
-- ✅ Fast cloning without git history
-- ✅ Automatic caching of downloaded archives
-- ✅ Interactive mode with repository history
-- ✅ Support for GitHub repositories
-- ✅ Support for specific branches/tags/commits using `#ref` syntax
-- ✅ **Automatic Git initialization with initial commit**
-- ✅ **Automatic opening in editor (VS Code, Cursor, or custom editor)**
-- ✅ Smart detection of existing git repositories
-
-#### Git Integration
-By default, `seda degit` will automatically:
-1. Initialize a new git repository (`git init`)
-2. Stage all files (`git add .`)
-3. Create an initial commit (`git commit -m "Init"`)
-
-This behavior can be disabled using the `--no-git` flag, and the command will skip git initialization if the destination is already inside a git repository.
-
-#### Editor Integration
-By default, `seda degit` will automatically open the cloned project in your preferred editor after successful cloning. The editor selection follows this priority:
-1. Custom editor set via `VSCODE_ALTERNATIVE` environment variable
-2. VS Code (`code` command)
-3. Cursor (`cursor` command)
-
-This behavior can be disabled using the `--no-open` flag.
-
-#### Examples
-```bash
-# Clone to current directory (with automatic git init + commit + editor opening)
-seda degit https://github.com/Rich-Harris/degit
-
-# Clone to specific directory (with automatic git init + commit + editor opening)
-seda degit https://github.com/Rich-Harris/degit my-project
-
-# Clone specific branch (with automatic git init + commit + editor opening)
-seda degit https://github.com/Rich-Harris/degit#dev my-project
-
-# Clone without git initialization but still open in editor
-seda degit https://github.com/Rich-Harris/degit my-project --no-git
-
-# Clone without opening in editor
-seda degit https://github.com/Rich-Harris/degit my-project --no-open
-
-# Clone without git initialization and without opening in editor
-seda degit https://github.com/Rich-Harris/degit my-project --no-git --no-open
-
-# Interactive mode (will open selected repo in editor)
+# Interactive mode - select from cached repositories
 seda degit
 
-# Interactive mode with destination (will open selected repo in editor)
+# Interactive mode - select from cached repositories to specific directory
 seda degit my-project
 
-# Verbose output (shows git operations and editor opening)
-seda degit https://github.com/Rich-Harris/degit my-project -v
+# Clone specific repository to current directory
+seda degit https://github.com/user/template-project
 
-# Force overwrite existing files, skip git init, and skip editor opening
-seda degit https://github.com/Rich-Harris/degit existing-project --force --no-git --no-open
+# Clone to specific directory
+seda degit https://github.com/user/template-project my-new-project
+
+# Clone with options
+seda degit https://github.com/user/template-project project --force --no-git
+
+# Clone specific branch or tag
+seda degit https://github.com/user/template-project#main
+seda degit https://github.com/user/template-project#v1.0.0
 ```
 
-## Development
+**Features:**
+- **Fast Cloning**: Downloads tar.gz archives instead of full git history
+- **Branch/Tag Support**: Clone specific branches, tags, or commit hashes using `#ref` syntax
+- **Repository Caching**: Automatically caches downloaded repositories for future use
+- **Interactive Mode**: When no repository is specified, shows a list of cached repositories
+- **Smart Extraction**: Automatically extracts and sets up the project structure
+- **Git Integration**: Optionally initializes a new git repository with an initial commit
+- **Editor Integration**: Automatically opens the project in your configured editor
 
-- Run in development mode:
-  ```bash
-  pnpm dev
-  ```
+## Configuration
 
-- Run tests:
-  ```bash
-  pnpm test
-  ```
+The tool automatically detects and uses your preferred code editor. Supported editors include:
+- Visual Studio Code
+- Cursor
+- And other popular editors
 
-- Lint code:
-  ```bash
-  pnpm lint
-  ```
+## Cache Management
 
-- Format code:
-  ```bash
-  pnpm format
-  ```
+Degit automatically caches downloaded repositories in:
+- **macOS/Linux**: `~/.cache/seda/`
+- **Windows**: `%LOCALAPPDATA%/seda/`
 
-## Project Structure
+Cached repositories are reused for faster subsequent downloads and are available in interactive mode.
 
-```
-src/
-├── commands/        # CLI commands
-│   └── code.ts     # Code command implementation
-├── utils/          # Utility functions
-│   ├── editor.ts   # Editor-related utilities
-│   └── git.ts      # Git-related utilities
-├── types.ts        # TypeScript type definitions
-└── index.ts        # Main entry point
-```
+## URL Formats
 
-## Environment Variables
+Both commands support various repository URL formats:
+- `https://github.com/user/repo`
+- `git@github.com:user/repo.git`
+- `github:user/repo`
+- And more...
 
-- `VSCODE_ALTERNATIVE`: Set a custom editor to replace VSCode. For example:
-  ```sh
-  export VSCODE_ALTERNATIVE=cursor
-  ```
+For degit, you can also specify branches, tags, or commits:
+- `https://github.com/user/repo#main`
+- `https://github.com/user/repo#v1.0.0`
+- `https://github.com/user/repo#abc123`
+
+## Use Cases
+
+### Development Workflow (`seda code`)
+Perfect for when you want to:
+- Quickly clone and start working on a repository
+- Maintain full git history for development
+- Contribute to existing projects
+
+### Project Scaffolding (`seda degit`)
+Ideal for:
+- Creating new projects from templates
+- Fast project setup without git history
+- Working with starter templates and boilerplates
+- Situations where you want a clean slate
+
+## Error Handling
+
+Both commands include robust error handling:
+- Automatic retry with alternative URL formats
+- Clear error messages and suggestions
+- Graceful handling of network issues
+- Protection against overwriting existing files (unless `--force` is used)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Please feel free to submit issues and pull requests.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-SedationH
+MIT License - see LICENSE file for details.
