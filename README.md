@@ -1,4 +1,4 @@
-# Seda CLI
+# seda CLI
 
 A powerful command-line tool for cloning and managing git repositories with enhanced workflow features.
 
