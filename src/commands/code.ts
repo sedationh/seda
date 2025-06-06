@@ -2,14 +2,10 @@ import { Command } from 'commander';
 import path from 'node:path';
 import fs from 'node:fs';
 import { cloneRepository, getAlternativeUrl, extractRepoName } from '../utils/git';
-import { openInEditor } from '../utils/editor';
+import { openDirectoryInEditor } from '../utils/editor';
 import { logger } from '../utils/logger';
 
-async function openDirectoryInEditor(targetDir: string): Promise<void> {
-  logger.info(`Opening directory: ${targetDir}`);
-  await openInEditor(targetDir);
-  logger.success('Project opened in editor.');
-}
+
 
 export function registerCodeCommand(program: Command): void {
   program

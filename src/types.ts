@@ -16,7 +16,6 @@ export interface RepoInfo {
   ref: string;
   url: string;
   ssh: string;
-  subdir?: string;
   mode: 'tar' | 'git';
 }
 

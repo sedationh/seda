@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import chalk from 'chalk';
 import inquirer from 'inquirer';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -15,8 +14,9 @@ import {
   saveCachedRepo,
   getCacheDir
 } from '../utils/git';
-import { openInEditor } from '../utils/editor';
+import { openDirectoryInEditor, openInEditor } from '../utils/editor';
 import { CachedRepo } from '../types';
+import { logger } from '../utils/logger';
 
 export function registerDegitCommand(program: Command): void {
   program
@@ -25,25 +25,24 @@ export function registerDegitCommand(program: Command): void {
     .argument('[repository]', 'Repository URL (e.g., https://github.com/user/repo)')
     .argument('[destination]', 'Destination directory', '.')
     .option('-f, --force', 'Overwrite existing files')
-    .option('-v, --verbose', 'Verbose output')
     .option('--no-git', 'Skip git init and initial commit')
     .option('--no-open', 'Skip opening project in editor')
     .action(async (repository?: string, destination?: string, options?: any) => {
       try {
         // Check if repository looks like a URL
-        const isUrl = repository && (repository.includes('github.com') || repository.startsWith('http'));
+        const isUrl = repository?.startsWith('http')
 
-        if (!repository || !isUrl) {
+        if (!isUrl) {
           // Interactive mode - show cached repos
           // If repository doesn't look like URL, treat it as destination
-          const dest = !isUrl && repository ? repository : (destination || '.');
+          const dest = repository || '.'
           await interactiveMode(dest, options);
         } else {
           // Direct mode - clone specific repo
-          await cloneRepo(repository, destination || '.', options);
+          await cloneRepo(repository!, destination || '.', options);
         }
       } catch (error) {
-        console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error');
+        logger.error(error instanceof Error ? error.message : 'Unknown error');
         process.exit(1);
       }
     });
@@ -53,8 +52,8 @@ async function interactiveMode(destination: string, options: any): Promise<void>
   const cachedRepos = getCachedRepos();
 
   if (cachedRepos.length === 0) {
-    console.log(chalk.yellow('No cached repositories found.'));
-    console.log(chalk.gray('Use: seda degit <repository-url> to clone a repository first.'));
+    logger.warning('No cached repositories found.');
+    logger.info('Use: seda degit <repository-url> to clone a repository first.');
     return;
   }
 
@@ -77,49 +76,57 @@ async function interactiveMode(destination: string, options: any): Promise<void>
 }
 
 async function cloneRepo(repository: string, destination: string, options: any): Promise<void> {
-  const { force = false, verbose = false, git = true, open = true } = options || {};
-
-  if (verbose) {
-    console.log(chalk.cyan(`> Parsing repository: ${repository}`));
-  }
+  const { force = false, git = true, open = true } = options || {};
+  const resolvedDestination = path.resolve(destination);
 
   const repo = parseRepoUrl(repository);
 
   // Check if destination exists and is not empty
-  if (fs.existsSync(destination)) {
-    const files = fs.readdirSync(destination);
+  if (fs.existsSync(resolvedDestination)) {
+    const files = fs.readdirSync(resolvedDestination);
     if (files.length > 0 && !force) {
       throw new Error(`Destination directory is not empty. Use --force to overwrite.`);
     }
   }
 
-  if (verbose) {
-    console.log(chalk.cyan(`> Fetching refs for ${repo.user}/${repo.name}`));
-  }
-
-  // Get the commit hash
+  // 获取仓库的提交哈希值（commit hash）
+  // 这个哈希值用于后续下载特定版本的源码压缩包
   let hash: string;
   try {
+    // 获取远程仓库的所有引用信息（包括分支、标签、HEAD等）
     const refs = await fetchRefs(repo);
+    
+    // 判断用户指定的引用类型
     if (repo.ref === 'HEAD') {
+      // 情况1: 用户没有指定具体分支/标签，使用默认的 HEAD
+      // 例如: https://github.com/user/repo (没有 # 锚点)
+      
+      // 从所有引用中找到 HEAD 引用
       const headRef = refs.find(ref => ref.type === 'HEAD');
       if (!headRef) {
         throw new Error('Could not find HEAD ref');
       }
+      // 使用 HEAD 指向的提交哈希
       hash = headRef.hash;
     } else {
+      // 情况2: 用户指定了具体的分支、标签或提交哈希
+      // 例如: https://github.com/user/repo#main
+      //      https://github.com/user/repo#v1.0.0  
+      //      https://github.com/user/repo#abc123
+      
+      // 根据用户指定的引用名称，查找对应的完整提交哈希
+      // selectRef 函数会匹配分支名、标签名或哈希前缀
       const selectedHash = selectRef(refs, repo.ref);
       if (!selectedHash) {
+        // 如果找不到指定的引用，抛出错误
         throw new Error(`Could not find ref: ${repo.ref}`);
       }
+      // 使用找到的提交哈希
       hash = selectedHash;
     }
   } catch (error) {
+    // 如果获取引用信息失败，包装错误信息重新抛出
     throw new Error(`Failed to fetch repository refs: ${error}`);
-  }
-
-  if (verbose) {
-    console.log(chalk.cyan(`> Found commit hash: ${hash}`));
   }
 
   // Prepare cache directories
@@ -132,62 +139,41 @@ async function cloneRepo(repository: string, destination: string, options: any):
 
   // Download if not cached
   if (!fs.existsSync(tarFile)) {
-    if (verbose) {
-      console.log(chalk.cyan(`> Downloading ${downloadUrl}`));
-    }
-
     try {
+      logger.info(`Downloading ${downloadUrl} to ${tarFile}`);
       await downloadFile(downloadUrl, tarFile);
+      logger.success(`Downloaded ${downloadUrl} to ${tarFile}`);
     } catch (error) {
       throw new Error(`Failed to download repository: ${error}`);
     }
   } else {
-    console.log(chalk.cyan(`> Using cached file: ${tarFile}`));
+    logger.success(`Using cached file: ${tarFile}`);
   }
 
   // Extract
-  if (verbose) {
-    console.log(chalk.cyan(`> Extracting to ${destination}`));
-  }
+  mkdirp(resolvedDestination);
 
-  mkdirp(destination);
+  logger.info(`Extracting ${tarFile} to ${resolvedDestination}`);
+  await extractTar(tarFile, resolvedDestination);
+  logger.success(`Extracted ${tarFile} to ${resolvedDestination}`);
 
-  const subdir = repo.subdir ? `${repo.name}-${hash}${repo.subdir}` : undefined;
-  await extractTar(tarFile, destination, subdir);
 
-  // Initialize git repository and make initial commit if enabled
   if (git) {
     try {
-      const destPath = path.resolve(destination);
+      // 使用 process.cwd() 作为基准
+      const destPath = path.resolve(resolvedDestination);
 
-      // Check if already in a git repository
       const isInGitRepo = fs.existsSync(path.join(destPath, '.git'));
 
       if (!isInGitRepo) {
-        if (verbose) {
-          console.log(chalk.cyan(`> Initializing git repository in ${destination}`));
-        }
+        execSync('git init', { cwd: destPath, stdio: 'pipe' });
 
-        // Initialize git repository
-        execSync('git init', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
+        execSync('git add .', { cwd: destPath, stdio: 'pipe' });
 
-        // Add all files
-        execSync('git add .', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
-
-        // Make initial commit
-        execSync('git commit -m "Init"', { cwd: destPath, stdio: verbose ? 'inherit' : 'pipe' });
-
-        if (verbose) {
-          console.log(chalk.cyan(`> Created initial commit`));
-        }
-      } else if (verbose) {
-        console.log(chalk.yellow(`> Skipping git init - already in a git repository`));
+        execSync('git commit -m "Init"', { cwd: destPath, stdio: 'pipe' });
       }
     } catch (error) {
-      if (verbose) {
-        console.log(chalk.yellow(`> Warning: Failed to initialize git repository: ${error}`));
-      }
-      // Don't fail the entire operation if git init fails
+      logger.warning(`Failed to initialize git repository: ${error}`);
     }
   }
 
@@ -199,19 +185,13 @@ async function cloneRepo(repository: string, destination: string, options: any):
   };
   saveCachedRepo(cachedRepo);
 
-  console.log(chalk.green(`✓ Cloned ${repo.user}/${repo.name}#${repo.ref} to ${destination}`));
 
   // Open project in editor if enabled
   if (open) {
-    if (verbose) {
-      console.log(chalk.cyan(`> Opening project in editor...`));
-    }
     try {
-      await openInEditor(path.resolve(destination));
-      console.log(chalk.green(`✓ Opened project in editor`));
+      await openDirectoryInEditor(resolvedDestination);
     } catch (error) {
-      console.log(chalk.yellow(`⚠ Could not open project in editor: ${error instanceof Error ? error.message : 'Unknown error'}`));
-      console.log(chalk.gray(`Navigate to: ${path.resolve(destination)}`));
+      logger.warning(`Could not open project in editor: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 } 

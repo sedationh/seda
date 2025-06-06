@@ -49,7 +49,7 @@ export const sedaHome = path.join(os.homedir(), '.seda');
 
 export function parseRepoUrl(src: string): RepoInfo {
   // Support GitHub URLs like https://github.com/user/repo
-  const match = /^(?:https:\/\/)?(?:www\.)?github\.com\/([^/\s]+)\/([^/\s#]+)(?:\/([^#]+))?(?:#(.+))?/.exec(src);
+  const match = /^(?:https:\/\/)?(?:www\.)?github\.com\/([^/\s]+)\/([^/\s#]+)(?:#(.+))?/.exec(src);
   
   if (!match) {
     throw new Error(`Could not parse repository URL: ${src}`);
@@ -57,8 +57,7 @@ export function parseRepoUrl(src: string): RepoInfo {
 
   const user = match[1];
   const name = match[2].replace(/\.git$/, '');
-  const subdir = match[3];
-  const ref = match[4] || 'HEAD';
+  const ref = match[3] || 'HEAD';
 
   const url = `https://github.com/${user}/${name}`;
   const ssh = `git@github.com:${user}/${name}`;
@@ -70,7 +69,6 @@ export function parseRepoUrl(src: string): RepoInfo {
     ref,
     url,
     ssh,
-    subdir,
     mode: 'tar'
   };
 }
@@ -162,14 +160,12 @@ export function selectRef(refs: Array<{type: string, name: string, hash: string}
   return null;
 }
 
-export async function extractTar(file: string, dest: string, subdir?: string): Promise<void> {
-  const stripComponents = subdir ? subdir.split('/').length : 1;
-  
+export async function extractTar(file: string, dest: string): Promise<void> {
   return tar.extract({
     file,
-    strip: stripComponents,
+    strip: 1,
     C: dest
-  }, subdir ? [subdir] : []);
+  });
 }
 
 export function getCacheDir(): string {
