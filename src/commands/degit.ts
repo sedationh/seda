@@ -14,7 +14,7 @@ import {
   saveCachedRepo,
   getCacheDir
 } from '../utils/git';
-import { openDirectoryInEditor, openInEditor } from '../utils/editor';
+import { openDirectoryInEditor } from '../utils/editor';
 import { CachedRepo } from '../types';
 import { logger } from '../utils/logger';
 
