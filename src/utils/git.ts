@@ -88,25 +88,62 @@ export function mkdirp(dir: string): void {
 
 export function downloadFile(url: string, dest: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    https.get(url, (response) => {
+    const request = https.get(url, (response) => {
       const code = response.statusCode;
+      
       if (code && code >= 400) {
+        response.resume(); // Consume response to free up memory
         reject(new Error(`HTTP ${code}: ${response.statusMessage}`));
-      } else if (code && code >= 300) {
+        return;
+      } 
+      
+      if (code && code >= 300) {
         // Handle redirects
+        response.resume(); // Consume response to free up memory
         const location = response.headers.location;
         if (location) {
           downloadFile(location, dest).then(resolve, reject);
         } else {
           reject(new Error('Redirect without location header'));
         }
-      } else {
-        response
-          .pipe(fs.createWriteStream(dest))
-          .on('finish', () => resolve())
-          .on('error', reject);
+        return;
       }
-    }).on('error', reject);
+      
+      // Success case
+      const writeStream = fs.createWriteStream(dest);
+      
+      writeStream.on('finish', () => {
+        writeStream.close();
+        resolve();
+      });
+      
+      writeStream.on('error', (error) => {
+        writeStream.close();
+        // Clean up partial file
+        fs.unlink(dest, () => {}); // Ignore unlink errors
+        reject(error);
+      });
+      
+      response.on('error', (error) => {
+        writeStream.close();
+        // Clean up partial file
+        fs.unlink(dest, () => {}); // Ignore unlink errors
+        reject(error);
+      });
+      
+      response.pipe(writeStream);
+    });
+    
+    request.on('error', (error) => {
+      request.destroy();
+      reject(error);
+    });
+    
+    // Set a timeout to prevent hanging
+    request.setTimeout(30000, () => {
+      request.destroy();
+      reject(new Error('Download timeout'));
+    });
   });
 }
 
